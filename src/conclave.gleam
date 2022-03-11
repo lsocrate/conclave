@@ -1,21 +1,24 @@
-import cards/animal_kingdom
-import cards/base_of_power
-import ecs/entity
-import ecs/register
-import ecs/system
+import entity/prompt
+import entity/turn
+import entity/world
 import gleam/io
-import atom/player_number
+import framework/turn_sequence
 
 pub fn main() {
-  register.init()
-  |> base_of_power.create(player_number.P1)
-  |> animal_kingdom.create(player_number.P2)
-  |> io.debug()
-  // let reg =
-  //   register.emplace(
-  //     reg,
-  //     ent,
-  //     component.Card(position: component.Exhausted, face_side: component.FaceUp),
-  //   )
-  // io.debug(reg)
+  world.World(
+    prompt: prompt.NoPrompt,
+    turn: turn.Turn(turn.BeginningPhase(turn.CityDeckStep)),
+  )
+  |> loop()
+}
+
+fn loop(world: world.World) -> world.World {
+  case world.prompt {
+    prompt.SinglePlayerPrompt(_) ->
+      world
+      |> io.debug()
+    _ ->
+      turn_sequence.advance(world)
+      |> loop()
+  }
 }
